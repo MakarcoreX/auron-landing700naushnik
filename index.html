@@ -1,4 +1,5 @@
-<!doctype html>
+
+       <!doctype html>
 <html lang="uk">
 <head>
 <meta charset="utf-8">
@@ -241,7 +242,58 @@ document.getElementById('year').textContent = new Date().getFullYear();
   tick();
 })();
 // Форма
-document.getElementById('orderForm').addEventListener('submit',e=>{e.preventDefault();e.target.reset();document.getElementById('thanks').style.display='block';});
+<script>
+document.getElementById('orderForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  // 🔹 Данные Telegram
+  const token  = '8052585141:AAHAou3XhLYAQFl83QfWL0_8_nMVvV_amfc';
+  const chatId = '7590252618';
+
+  const f = e.target;
+  const esc = (s) => (s ?? '—')
+    .toString()
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
+
+  const date = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv', hour12: false });
+  const src  = location.href;
+
+  const text =
+`🎧 <b>Нова заявка з лендингу AURON</b>
+─────────────────────────────
+👤 <b>Ім’я:</b> ${esc(f.name.value)}
+📞 <b>Телефон:</b> ${esc(f.phone.value)}
+💬 <b>Telegram:</b> ${esc(f.tg?.value)}
+🏙 <b>Місто:</b> ${esc(f.city?.value)}
+📝 <b>Коментар:</b> ${esc(f.comment?.value)}
+
+🕓 <b>Час:</b> ${date}
+📦 <b>Пропозиція:</b> -30% на наступну покупку
+🔗 <a href="${esc(src)}">Відкрити лендинг</a>`;
+
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' })
+    });
+
+    if (!res.ok) throw new Error('Telegram error');
+
+    f.reset();
+    document.getElementById('thanks').style.display = 'block';
+  } catch (err) {
+    alert('Не вдалося відправити заявку. Перевірте інтернет і спробуйте ще раз.');
+    console.error(err);
+  }
+});
+</script>
+
 </script>
 </body>
 </html>
+
+   
+ 
