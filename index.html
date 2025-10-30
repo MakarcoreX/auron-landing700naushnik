@@ -216,70 +216,27 @@ h3{margin:0 0 8px;font-size:clamp(16px,4.8vw,20px)}
 </div>
 
 <script>
-// Рік
-document.getElementById('year').textContent = new Date().getFullYear();
-// Залишки
-(function(){
-  const k='ls_bright_stock'; let v=sessionStorage.getItem(k);
-  if(!v){ v = Math.floor(15+Math.random()*10); sessionStorage.setItem(k,v); }
-  document.getElementById('left').textContent = v;
-  document.getElementById('left2').textContent = v;
-})();
-// Таймер до кінця дня
-(function(){
-  const el = document.getElementById('count');
-  const deadline = new Date(); deadline.setHours(23,59,59,0);
-  function tick(){
-    const diff = +deadline - Date.now();
-    if(diff<=0){ el.textContent='00:00:00'; return; }
-    const h = String(Math.floor(diff/3600000)).padStart(2,'0');
-    const m = String(Math.floor(diff%3600000/60000)).padStart(2,'0');
-    const s = String(Math.floor(diff%60000/1000)).padStart(2,'0');
-    el.textContent = h+':'+m+':'+s;
-    requestAnimationFrame(tick);
-  }
-  tick();
-})();
-// Форма
-<script>
 document.getElementById('orderForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  // 🔹 Данные Telegram
-  const token  = '8052585141:AAHAou3XhLYAQFl83QfWL0_8_nMVvV_amfc';
-  const chatId = '7590252618';
-
   const f = e.target;
-  const esc = (s) => (s ?? '—')
-    .toString()
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;');
-
-  const date = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv', hour12: false });
-  const src  = location.href;
-
-  const text =
-`🎧 <b>Нова заявка з лендингу AURON</b>
-─────────────────────────────
-👤 <b>Ім’я:</b> ${esc(f.name.value)}
-📞 <b>Телефон:</b> ${esc(f.phone.value)}
-💬 <b>Telegram:</b> ${esc(f.tg?.value)}
-🏙 <b>Місто:</b> ${esc(f.city?.value)}
-📝 <b>Коментар:</b> ${esc(f.comment?.value)}
-
-🕓 <b>Час:</b> ${date}
-📦 <b>Пропозиція:</b> -30% на наступну покупку
-🔗 <a href="${esc(src)}">Відкрити лендинг</a>`;
+  const payload = {
+    name: f.name.value,
+    phone: f.phone.value,
+    tg: f.tg?.value || '',
+    city: f.city?.value || '',
+    comment: f.comment?.value || '',
+    src: location.href
+  };
 
   try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    const res = await fetch('/api/send-telegram', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' })
+      body: JSON.stringify(payload)
     });
 
-    if (!res.ok) throw new Error('Telegram error');
+    if (!res.ok) throw new Error('API error');
 
     f.reset();
     document.getElementById('thanks').style.display = 'block';
@@ -291,13 +248,3 @@ document.getElementById('orderForm').addEventListener('submit', async (e) => {
 </script>
 </body>
 </html>
-
-
-
-
-
-  
-
-
-
- 
